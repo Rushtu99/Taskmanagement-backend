@@ -6,6 +6,7 @@ return [
         'passwords' => 'users',
     ],
 
+
     'guards' => [
         'api' => [
             'driver' => 'jwt',
@@ -18,5 +19,15 @@ return [
             'driver' => 'eloquent',
             'model' => \App\Models\User::class
         ]
-    ]
+    ],
+
+    'passwords' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'provider' => 'users',
+            // 'email' => 'auth.emails.password',
+            'table' => 'password_resets',
+            'expire' => 360,
+        ],
+    ],
 ];

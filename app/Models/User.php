@@ -13,12 +13,12 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use App\Traits\MustVerifyEmail;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject ,CanResetPasswordContract
 {
 
-    use Authenticatable, Authorizable, Notifiable, MustVerifyEmail,CanResetPassword;
+    use Authenticatable, Authorizable,HasFactory, Notifiable, MustVerifyEmail,CanResetPassword;
 /**
      * The attributes that are mass assignable.
      *
@@ -71,6 +71,8 @@ protected static function boot()
        */
       if( $model->isDirty('email') ) {
         $model->setAttribute('email_verified_at', null);
+        $model->sendEmailVerificationNotification();
+
       }
     });
    }

@@ -68,8 +68,6 @@ protected static function boot()
     
 //     static::saved(function ($model) {
 // /**
-//        * If user email have changed email verification is required
-//        */
 //       if( $model->isDirty('email') ) {
 //         $model->setAttribute('', null);
 //       }

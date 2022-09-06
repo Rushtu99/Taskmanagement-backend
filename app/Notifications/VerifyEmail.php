@@ -1,10 +1,14 @@
 <?php
 namespace App\Notifications;
+
+
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Lang;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Bus\Queueable;
+
+
 class VerifyEmail extends Notification
 {
     use Queueable;
@@ -51,7 +55,8 @@ return (new MailMessage)
     protected function verificationUrl($notifiable)
     {
         $token = JWTAuth::fromUser($notifiable);
-return route('email.verify', ['token' => $token], false);
+            //return route('email.verify', ['token' => $token], false);
+            return 'http://localhost:3000/email/verify?token='.$token;
     }
 /**
      * Set a callback that should be used when building the notification mail message.
