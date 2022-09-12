@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use lluminate\Http\RedirectResponse;
+use App\Notification\ResetPassword;
 
 trait ResetsPasswords
 {
@@ -22,6 +23,7 @@ trait ResetsPasswords
 
     public function reset(Request $request)
     {
+
         $this->validate($request, $this->rules(), $this->validationErrorMessages(),);
 
         $response = $this->broker()->reset(
@@ -81,7 +83,6 @@ trait ResetsPasswords
 
     protected function sendResetFailedResponse(Request $request, $response)
     {
-        // return response("bob");
         return response()->json(['error' => trans($response), 'email' => $request->email]);
     }
     

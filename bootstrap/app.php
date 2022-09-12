@@ -22,8 +22,6 @@ date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
 $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
-$app->alias('mail.manager', Illuminate\Mail\MailManager::class);
-$app->alias('mail.manager', Illuminate\Contracts\Mail\Factory::class);
 $app->withFacades();
 
 $app->withEloquent();
@@ -66,6 +64,7 @@ $app->configure('mail');
 $app->configure('jwt');
 $app->configure('services');
 $app->configure('permission');
+$app->configure('broadcasting');
 
 
 /*
@@ -119,6 +118,7 @@ $app->alias('mailer', Illuminate\Contracts\Mail\Mailer::class);
 $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
 $app->alias('cache', 'Illuminate\Cache\CacheManager');
 $app->alias('auth', 'Illuminate\Auth\AuthManager');
+$app->alias('Pusher',Pusher\Pusher::class);
 
 /*
 |--------------------------------------------------------------------------

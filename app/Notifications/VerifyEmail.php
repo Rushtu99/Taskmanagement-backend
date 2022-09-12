@@ -41,7 +41,7 @@ if (static::$toMailCallback) {
             return call_user_func(static::$toMailCallback, $notifiable, $verificationUrl);
         }
 return (new MailMessage)
-            ->subject(Lang::get('Verify Email Address'))
+            ->subject(Lang::get('notif Email Address'))
             ->line(Lang::get('Please click the button below to verify your email address.'))
             ->action(Lang::get('Verify Email Address'), $verificationUrl)
             ->line(Lang::get('If you did not create an account, no further action is required.'));

@@ -71,7 +71,7 @@ protected static function boot()
        */
       if( $model->isDirty('email') ) {
         $model->setAttribute('email_verified_at', null);
-        $model->sendEmailVerificationNotification();
+        //$model->sendEmailVerificationNotification();
 
       }
     });

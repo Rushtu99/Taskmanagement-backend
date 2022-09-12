@@ -2,6 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Traits\SendsPasswordResetEmails;
+use App\Notification\ResetPassword;
+
 
 class RequestPasswordController extends Controller
 {

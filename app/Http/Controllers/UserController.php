@@ -58,10 +58,9 @@ class UserController extends Controller
     {
         $role = $request->role_change_to;
         $user = auth()->user();
-        $admin = Admin::find($user->id);
         $user_ = User::findOrFail($request->to);
         //return response($user_);
-        if($admin){
+        if($user->role==1){
             $user_->role = $role;
             $user_->save();
             return response("changed ADMIN");

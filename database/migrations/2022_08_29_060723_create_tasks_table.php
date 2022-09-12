@@ -22,7 +22,7 @@ class CreateTasksTable extends Migration
             $table->string('assigned_by_name');
             $table->string('assigned_to_name');
             $table->string('status');
-            $table->date('due_date');
+            $table->dateTime('due_date');
             $table->timestamps();
         });
     }

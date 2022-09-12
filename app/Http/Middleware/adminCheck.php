@@ -10,16 +10,13 @@ class adminCheck
 {
     public function handle($request, Closure $next)
     {
-        $email = auth()->user()['email'];
+        $user = auth()->user();
 
         //$id = $data['id'];
-        $temp = DB::table('admins')->get();
-        foreach ($temp as $t){
-            if($t->email == $email){
+            if($user->role == 1){
                 return $next($request);
             }
-        }
-        return response("not admin :(");
+        return response("not admin :(",401);
    
     }
 }

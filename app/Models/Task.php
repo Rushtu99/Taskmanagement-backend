@@ -46,8 +46,6 @@ class Task extends Model
         parent::boot();
         static::saved(function ($model) {
             if( $model->isDirty('desc') ) {
-                // $date = carbon::now();
-                //$model->setAttribute('due_date',$date);
                 $model->setAttribute('status', 'Assigned');
             }
         });

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Admin;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 
 
@@ -15,7 +16,7 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'refresh']]);
+        $this->middleware('auth:api', ['except' => ['login', 'refresh','captcha']]);
     }
 
     public function emailRequestVerification(Request $request)
@@ -65,6 +66,7 @@ class AuthController extends Controller
 
     public function me()
     {
+        //return response("invalid",401);
         return response()->json(auth()->user());
     }
 
@@ -127,6 +129,17 @@ class AuthController extends Controller
 
     public function test(Request $request)
     {
+        Mail::send();
         return response();
+    }
+
+    public function captcha(Request $request){
+        $token = $request->ref;
+        $key = env('CAPTCHA_SECRET_KEY');
+        $url = "https://www.google.com/recaptcha/api/siteverify?secret={$key}&response={$token}";
+        $response = Http::post($url);
+
+        return response($response);
+
     }
 }
