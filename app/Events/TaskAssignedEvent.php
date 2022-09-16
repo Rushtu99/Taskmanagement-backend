@@ -6,7 +6,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable; // not available in lumen
 use Illuminate\Broadcasting\InteractsWithSockets;
-class TaskAssignedEvent extends Event implements ShouldBroadcast
+class TaskAssignedEvent extends Event /*implements ShouldBroadcast*/
 {
     use  SerializesModels;
     public $user;
@@ -14,9 +14,9 @@ class TaskAssignedEvent extends Event implements ShouldBroadcast
     {
         $this->user=$user;
     }
-    public function broadcastOn()
-    {
-        return [env('PUSHER_APP_KEY')];
-    }
+    // public function broadcastOn()
+    // {
+    //     return [env('PUSHER_APP_KEY')];
+    // }
 
 }

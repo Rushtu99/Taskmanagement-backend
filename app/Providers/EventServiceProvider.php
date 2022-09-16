@@ -13,7 +13,8 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         'App\Events\TaskAssignedEvent' => [
-            'App\Listeners\TaskAssignedListener',
+            'App\Listeners\SendTaskMail',
+            'App\Listeners\SendPusherNotif'
            ],
     ];
 }

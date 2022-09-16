@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use App\Models\Admin;
+use App\Models\Notification;
 use App\Models\Task;
 use App\Http\Middleware\isAdmin;
 use Illuminate\Support\Facades\DB;
@@ -28,8 +28,15 @@ class TaskController extends Controller
             'due_date' => 'required|date',
         ]);
         $task = new Task;
+        $t = (auth()->user()->name);
+        $notif = new Notification;
         $to = User::findorfail($request->assigned_to);
-
+        // 'reciever_id', 'sender_id', 'message', 'description','seen'
+        $notif->reciever_id = $request->assigned_to;
+        $notif->sender_id = (auth()->user()->id);
+        $notif->message = "New Task has been assigned by {$t}";
+        $notif->description = $request->title;
+        $notif->seen = false;
 
         $task->status = 'assigned';
 
@@ -44,18 +51,17 @@ class TaskController extends Controller
 
 
         $data = ['by' => $user, 'to' => $to];
-
-        $pusher = new Pusher(env('PUSHER_APP_KEY'), env('PUSHER_APP_SECRET'), env('PUSHER_APP_ID'), ['cluster' => env('PUSHER_APP_CLUSTER')]);
-
-        $pusher->trigger('my-channel', 'my-event', array('new task assigned'));
         event(new TaskAssignedEvent($data));
-        //return response('b');
+
+     
         if ($user->role == 1) {
             $task->save();
+            $notif->save();
             return response()->json($task, 200);
         } else {
             if ($request->assigned_to == $user->id) {
                 $task->save();
+                $notif->save();
                 return response()->json($task, 200);
             }
         }
@@ -64,22 +70,37 @@ class TaskController extends Controller
 
     public function showTasks(Request $request)
     {
+        $filter = $request->search;
+
         $me = auth()->user()->id;
-        $temp = DB::table('tasks')->get();
         $results = DB::table('tasks')
             ->where('status', '!=', 'Deleted')
             ->where(function ($query) {
                 $query->where('assigned_to', '=', auth()->user()->id)
                     ->orWhere('assigned_by', '=', auth()->user()->id);
             })
-            ->get();
+            ->where(function ($query) use ($filter) {
+                $query->where('assigned_to_name', 'LIKE', "%{$filter}%")
+                    ->orWhere('assigned_by_name', 'LIKE', "%{$filter}%")
+                    ->orWhere('status', 'LIKE', "%{$filter}%")
+                    ->orWhere('desc', 'LIKE', "%{$filter}%")
+                    ->orWhere('title', 'LIKE', "%{$filter}%");
+            })
+            ->paginate(5);
         return response()->json($results);
     }
 
     public function showAllTasks(Request $request)
     {
+        $filter = $request->search;
         $me = auth()->user()->id;
-        $temp = DB::table('tasks')->get();
+        $temp = DB::table('tasks')->where(function ($query) use ($filter) {
+            $query->where('assigned_to_name', 'LIKE', "%{$filter}%")
+                ->orWhere('assigned_by_name', 'LIKE', "%{$filter}%")
+                ->orWhere('status', 'LIKE', "%{$filter}%")
+                ->orWhere('desc', 'LIKE', "%{$filter}%")
+                ->orWhere('title', 'LIKE', "%{$filter}%");
+        })->paginate(5);
         return response()->json($temp);
     }
 
@@ -97,7 +118,7 @@ class TaskController extends Controller
     }
 
 
-    public function deleteTask($id,Request $request)
+    public function deleteTask($id, Request $request)
     {
         $user = auth()->user();
         $task = Task::findOrFail($id);
@@ -107,5 +128,69 @@ class TaskController extends Controller
             $task->save();
         }
         return response('Deleted Successfully', 200);
+    }
+
+    public function stats(Request $request)
+    {
+        $me = auth()->user()->id;
+        $temp = DB::table('tasks')->get();
+        $Assigned = 0;
+        $InProgress = 0;
+        $Completed = 0;
+
+        if ($request->type == 'to') {
+            $results = DB::table('tasks')
+                ->where('status', '!=', 'Deleted')
+                ->where(function ($query) {
+                    $query->where('assigned_to', '=', auth()->user()->id);
+                    // ->orWhere('assigned_by', '=', auth()->user()->id);
+                })->get();
+        }
+        if ($request->type == 'by') {
+            $results = DB::table('tasks')
+                ->where('status', '!=', 'Deleted')
+                ->where(function ($query) {
+                    $query->where('assigned_by', '=', auth()->user()->id);
+                    // ->orWhere('assigned_by', '=', auth()->user()->id);
+                })->get();
+        }
+        foreach ($results as $task) {
+            if ($task->status == 'Completed') {
+                $Completed++;
+            }
+            if ($task->status == 'assigned') {
+                $Assigned++;
+            }
+            if ($task->status == 'In Progress') {
+                $InProgress++;
+            }
+        }
+
+        return response([$Assigned, $Completed, $InProgress], 200);
+    }
+
+    public function changeTaskStatusBulk(Request $request)
+    {
+        $arr = $request->idArray;
+        $action = $request->bulkAction;
+        $user = auth()->user();
+        if ($user->role == 1) {
+            foreach ($arr as $id) {
+                $task = Task::findOrFail($id);
+                $task->status = $action;
+                $task->save();
+            }
+        } else {
+            return response("not Authorized", 401);
+        }
+        return response($request);
+    }
+
+    public function setSeen(Request $request){
+        $id = $request->id;
+        $notif = Notification::findOrFail($id);
+        $notif->seen = true;
+        $notif->save();
+        return response($id);
     }
 }

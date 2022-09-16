@@ -19,35 +19,47 @@ $router->group(['prefix' => 'api', 'middleware' => ['auth', 'Cors']], function (
   $router->put('users/{id}', ['uses' => 'UserController@update']);
   $router->post('me', 'AuthController@me');
   $router->get('role', 'UserController@role');
-
+  $router->post('stats','TaskCOntroller@stats');
   $router->post('logout', 'AuthController@logout');
   $router->post('refresh', 'AuthController@refresh');
   $router->post('showTasks', 'TaskController@showTasks');
   $router->post('changeStatus', 'TaskController@changeStatus');
   $router->post('changeRole', 'UserController@changeRole');
   $router->post('deleteTask/{id}', 'TaskController@deleteTask');
+  $router->post('changeTaskStatusBulk', 'TaskController@changeTaskStatusBulk');
+
   $router->post('createTask', ['uses' => 'TaskController@createTask']);
+  
 });
 
 $router->group(['prefix' => 'api', 'middleware' => 'Cors'], function () use ($router) {
-  $router->get('/users',  ['uses' => 'UserController@showAllUsers']);
+  $router->post('/showUsers',  ['uses' => 'UserController@showAllUsers']);
   $router->get('/users/{id}', ['uses' => 'UserController@showOneUser']);
   $router->post('login', 'AuthController@login');
   $router->post('isAdmin', 'AuthController@admin');
+  $router->post('notifications', 'UserController@notif');
+
   $router->post('users', 'UserController@create');
   $router->post('captcha', 'AuthController@captcha');
+  $router->post('setSeen','TaskController@setSeen');
 
 });
 $router->group(['middleware' => 'Cors'], function () use ($router) {
+  $router->options('api/notifications', 'AuthController@Cors');
+
   $router->options('api/isAdmin', 'AuthController@Cors');
   $router->options('api/showTasks', 'AuthController@Cors');
   $router->options('api/showAllTasks', 'AuthController@Cors');
   $router->options('api/deleteTask/{id}', 'AuthController@Cors');
-
+  $router->options('api/showUsers', 'AuthController@Cors');
+  $router->options('api/changeTaskStatusBulk', 'AuthController@Cors');
+  $router->options('api/stats', 'AuthController@Cors');
   $router->options('api/logout', 'AuthController@Cors');
   $router->options('api/changeStatus', 'AuthController@Cors');
   $router->options('api/createTask', 'AuthController@Cors');
   $router->options('api/me', 'AuthController@Cors');
+  $router->options('api/setSeen', 'AuthController@Cors');
+
   $router->options('email/request-verification', 'AuthController@Cors');
   $router->options('email/verify', 'AuthController@Cors');
   $router->options('api/changeRole', 'AuthController@Cors');

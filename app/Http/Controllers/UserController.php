@@ -12,16 +12,25 @@ use Illuminate\Support\Facades\Auth;
 
 
 class UserController extends Controller
-{       
+{
 
     // public function __construct()
     // {
     //     $this->middleware('isAdmin');
     // }
-    
-    public function showAllUsers()
+
+    public function showAllUsers(Request $request)
     {
-        return response()->json(User::all());
+        $filter = $request->search;
+
+        $response = DB::table('users')
+            ->where(function ($query) use ($filter) {
+                $query->where('name', 'LIKE', "%{$filter}%")
+                    ->orWhere('email', 'LIKE', "%{$filter}%")
+                    ->orWhere('id', 'LIKE', "%{$filter}%");
+            })->paginate(5);
+
+        return response($response);
     }
 
     public function showOneUser($id)
@@ -29,7 +38,17 @@ class UserController extends Controller
         return response()->json(User::find($id));
     }
 
-    
+    public function notif(Request $request){
+        $user = auth()->user();
+        $response = DB::table('notifications')
+            ->where(function ($query) use ($user) {
+                $query->where('reciever_id', '=',$user->id)
+                ->where('seen','=',false);
+            })->paginate(30);
+
+            // $response;
+        return response($response);
+    }
 
     public function create(Request $request)
     {
@@ -44,15 +63,14 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->input('password'));
         $user->role = 2;
-         $user->save();
-         //$data['password'] =  Hash::make($request->input('password'));
+        $user->save();
+        //$data['password'] =  Hash::make($request->input('password'));
 
-         //$table->insert($data);
-         //$table->save();
-         return response()->json($user, 200);
+        //$table->insert($data);
+        //$table->save();
+        return response()->json($user, 200);
         // User::create($data);
     }
-
 
     public function changeRole(Request $request)
     {
@@ -60,7 +78,7 @@ class UserController extends Controller
         $user = auth()->user();
         $user_ = User::findOrFail($request->to);
         //return response($user_);
-        if($user->role==1){
+        if ($user->role == 1) {
             $user_->role = $role;
             $user_->save();
             return response("changed ADMIN");
@@ -74,8 +92,6 @@ class UserController extends Controller
         return response($user->role);
     }
 
-
-
     public function update($id, Request $request)
     {
         $user = User::findOrFail($id);
@@ -84,13 +100,9 @@ class UserController extends Controller
         return response()->json($user, 200);
     }
 
-
-
     public function delete($id)
     {
         User::findOrFail($id)->delete();
         return response('Deleted Successfully', 200);
     }
-
-    
 }
