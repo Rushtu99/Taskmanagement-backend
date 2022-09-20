@@ -34,8 +34,8 @@ class TaskController extends Controller
         // 'reciever_id', 'sender_id', 'message', 'description','seen'
         $notif->reciever_id = $request->assigned_to;
         $notif->sender_id = (auth()->user()->id);
-        $notif->message = "New Task has been assigned by {$t}";
-        $notif->description = $request->title;
+        $notif->message = "New Task assigned";
+        $notif->description = "New Task $request->title has been assigned by {$t}. Deadline is {$request->due_date}";
         $notif->seen = false;
 
         $task->status = 'assigned';
@@ -71,6 +71,20 @@ class TaskController extends Controller
     public function showTasks(Request $request)
     {
         $filter = $request->search;
+            $sort = 'due_date';
+    
+        if($request->sort == 'Assigned By'){
+            $sort = 'assigned_by';
+        }
+        if($request->sort == 'Title'){
+            $sort = 'title';
+        }
+        if($request->sort == 'Assigned To'){
+            $sort = 'assigned_to';
+        }
+        if($request->sort == 'Status'){
+            $sort = 'status';
+        }
 
         $me = auth()->user()->id;
         $results = DB::table('tasks')
@@ -85,14 +99,30 @@ class TaskController extends Controller
                     ->orWhere('status', 'LIKE', "%{$filter}%")
                     ->orWhere('desc', 'LIKE', "%{$filter}%")
                     ->orWhere('title', 'LIKE', "%{$filter}%");
-            })
-            ->paginate(5);
+            })->orderBy($sort,"asc")
+            ->paginate(6);
         return response()->json($results);
     }
 
     public function showAllTasks(Request $request)
     {
         $filter = $request->search;
+        // return response($request);
+        
+            $sort = 'due_date';
+        
+        if($request->sort == 'Assigned By'){
+            $sort = 'assigned_by';
+        }
+        if($request->sort == 'Title'){
+            $sort = 'title';
+        }
+        if($request->sort == 'Assigned To'){
+            $sort = 'assigned_to';
+        }
+        if($request->sort == 'Status'){
+            $sort = 'status';
+        }
         $me = auth()->user()->id;
         $temp = DB::table('tasks')->where(function ($query) use ($filter) {
             $query->where('assigned_to_name', 'LIKE', "%{$filter}%")
@@ -100,7 +130,8 @@ class TaskController extends Controller
                 ->orWhere('status', 'LIKE', "%{$filter}%")
                 ->orWhere('desc', 'LIKE', "%{$filter}%")
                 ->orWhere('title', 'LIKE', "%{$filter}%");
-        })->paginate(5);
+        })->orderBy($sort,"asc")
+        ->paginate(6);
         return response()->json($temp);
     }
 
@@ -109,9 +140,22 @@ class TaskController extends Controller
         $status = $request->status_change_to;
         $user = auth()->user();
         $task = Task::findOrFail($request->id);
+
+        $notif = new Notification;
+        $to = User::findorfail($task->assigned_by);
+        // 'reciever_id', 'sender_id', 'message', 'description','seen'
+        $t = (auth()->user()->name);
+
+        $notif->reciever_id = $task->assigned_by;
+        $notif->sender_id = (auth()->user()->id);
+        $notif->message = "Task status updated";
+        $notif->description = "Task {$title} status has been changed to {$status} by {$t}";
+        $notif->seen = false;
+
         if ($user->role == 1 || $task->assigned_by == $user->id || $task->assigned_to == $user->id) {
             $task->status = $status;
             $task->save();
+            $notif->save();
             return response("changed ADMIN");
         }
         return response("not Authorized", 401);

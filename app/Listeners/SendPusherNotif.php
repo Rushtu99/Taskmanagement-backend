@@ -24,9 +24,9 @@ class SendPusherNotif
     public function handle(TaskAssignedEvent $data)
     {
         $user=$data->user;
-
+        // dd($user["by"]->id);
         $pusher = new Pusher(env('PUSHER_APP_KEY'), env('PUSHER_APP_SECRET'), env('PUSHER_APP_ID'), ['cluster' => env('PUSHER_APP_CLUSTER')]);
-        $pusher->trigger("my-channel-{$user->id}", 'Task Assigned', 'new task assigned');
+        $pusher->trigger("my-channel-{$user["to"]->id}", 'Task Assigned', 'new task assigned');
      
         
     }

@@ -36,14 +36,16 @@ class Scheduler extends Command
         $this->line('Scheduling is running..');
         while (true) {
             if (Carbon::now()->hour === 0) {
-                $this->line('Called for Daily..');
+                $this->line('Ran at..');
+                $this->line(Carbon::now());
+
                 Artisan::call('schedule:run');
                 $output = Artisan::output();
                 if ($output != 'No scheduled commands are ready to run.') {
                     $this->line($output);
                 }
             }
-            sleep(3500);
+            sleep(3000);
         }
     }
 }

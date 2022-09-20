@@ -22,7 +22,7 @@ class SendTaskMail
 
         Mail::send('emails.taskassigned',$data->user, function ($message) use($user) {
         $message->to($user['to']->email, $user['to']->name)->subject('new task assigned');
-        $message->from('lumen_react@dnr.com','react-app');
+        $message->from(env('MAIL_FROM_ADDRESS'),env('MAIL_FROM_NAME'));
       });
     }
 }
